@@ -29,6 +29,27 @@ jobs:
             6.0.x
             7.0.x
 
+      # The pinned vcpkg expects 7-Zip 21.07 from 7-zip.org, which no longer hosts it.
+      # Seed vcpkg's download cache from a mirror (vcpkg still verifies the SHA512).
+      - name: Seed vcpkg 7-Zip download
+        shell: pwsh
+        run: |
+          $dest = "vendor/vcpkg/downloads/7z2107-extra.7z"
+          $expected = "648d894940bcc29951752d7a8fd18c770ee8d4fd944e17f1a52588e51ca8f58375ba48514538f2e1387786fd812bb86f75fd6bdd0892685cdcafb2989942c848"
+          New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+          $urls = @(
+            "https://downloads.sourceforge.net/project/sevenzip/7-Zip/21.07/7z2107-extra.7z",
+            "https://web.archive.org/web/2023id_/https://www.7-zip.org/a/7z2107-extra.7z"
+          )
+          foreach ($u in $urls) {
+            curl.exe -fsSL --retry 3 -o $dest $u
+            if ($LASTEXITCODE -eq 0 -and (Get-FileHash $dest -Algorithm SHA512).Hash.ToLower() -eq $expected) {
+              Write-Host "Got 7-Zip from $u"; exit 0
+            }
+            Write-Host "Mirror failed: $u"
+          }
+          throw "Could not download 7z2107-extra.7z"
+
       - name: Restore .NET tools
         run: dotnet tool restore
 
