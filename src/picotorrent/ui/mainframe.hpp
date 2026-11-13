@@ -79,6 +79,9 @@ namespace Models
         void OnIconize(wxIconizeEvent&);
         void OnTaskBarLeftDown(wxTaskBarIconEvent&);
         void OnViewPreferences(wxCommandEvent&);
+        void OnViewTheme(wxCommandEvent&);
+        void RestartApplication();
+        void UpdateThemeMenu();
         void ParseTorrentFiles(std::vector<libtorrent::add_torrent_params>& params, std::vector<std::wstring> const& paths);
         void ShowTorrentContextMenu(wxCommandEvent&);
         void UpdateLabels();

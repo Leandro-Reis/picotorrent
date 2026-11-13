@@ -28,6 +28,11 @@ namespace UI
         ptID_EVT_SHOW_STATUS_BAR,
         ptID_EVT_VIEW_PREFERENCES,
 
+        // Must stay contiguous (bound as a range)
+        ptID_EVT_THEME_LIGHT,
+        ptID_EVT_THEME_DARK,
+        ptID_EVT_THEME_SYSTEM,
+
         ptID_KEY_ADD_TORRENT,
         ptID_KEY_ADD_MAGNET_LINK,
         ptID_KEY_VIEW_HELP,

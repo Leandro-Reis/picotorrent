@@ -110,6 +110,7 @@ MainFrame::MainFrame(std::shared_ptr<pt::Core::Environment> env, std::shared_ptr
     m_menuItemDetailsPanel->Check(m_cfg->Get<bool>("ui.show_details_panel").value());
     m_menuItemStatusBar->SetCheckable(true);
     m_menuItemStatusBar->Check(m_cfg->Get<bool>("ui.show_status_bar").value());
+    this->UpdateThemeMenu();
 
     if (!m_cfg->Get<bool>("ui.show_console_input").value()) { m_console->Hide(); }
     if (!m_cfg->Get<bool>("ui.show_details_panel").value()) { m_splitter->Unsplit(); }
@@ -251,6 +252,7 @@ MainFrame::MainFrame(std::shared_ptr<pt::Core::Environment> env, std::shared_ptr
     this->Bind(wxEVT_MENU, &MainFrame::OnFileCreateTorrent, this, ptID_EVT_CREATE_TORRENT);
     this->Bind(wxEVT_MENU, [this](wxCommandEvent&) { this->Close(true); }, ptID_EVT_EXIT);
     this->Bind(wxEVT_MENU, &MainFrame::OnViewPreferences, this, ptID_EVT_VIEW_PREFERENCES);
+    this->Bind(wxEVT_MENU, &MainFrame::OnViewTheme, this, ptID_EVT_THEME_LIGHT, ptID_EVT_THEME_SYSTEM);
     this->Bind(wxEVT_MENU, &MainFrame::OnViewHelp, this, ptID_EVT_VIEW_HELP);
     this->Bind(wxEVT_MENU, &MainFrame::OnHelpAbout, this, ptID_EVT_ABOUT);
 
@@ -654,6 +656,13 @@ wxMenuBar* MainFrame::CreateMainMenu()
     m_menuItemDetailsPanel = m_viewMenu->Append(ptID_EVT_SHOW_DETAILS, i18n("amp_details_panel"));
     m_menuItemStatusBar = m_viewMenu->Append(ptID_EVT_SHOW_STATUS_BAR, i18n("amp_status_bar"));
     m_viewMenu->AppendSeparator();
+
+    auto themeMenu = new wxMenu();
+    themeMenu->AppendRadioItem(ptID_EVT_THEME_LIGHT, i18n("light_theme"));
+    themeMenu->AppendRadioItem(ptID_EVT_THEME_DARK, i18n("dark_theme"));
+    themeMenu->AppendRadioItem(ptID_EVT_THEME_SYSTEM, i18n("follow_system_theme"));
+    m_viewMenu->AppendSubMenu(themeMenu, i18n("theme"));
+    m_viewMenu->AppendSeparator();
     m_viewMenu->Append(ptID_EVT_VIEW_PREFERENCES, i18n("amp_preferences"));
 
     auto helpMenu = new wxMenu();
@@ -772,6 +781,68 @@ void MainFrame::OnTaskBarLeftDown(wxTaskBarIconEvent&)
     this->SendSizeEvent();
 }
 
+void MainFrame::RestartApplication()
+{
+    TCHAR path[MAX_PATH];
+    GetModuleFileName(NULL, path, ARRAYSIZE(path));
+
+    std::wstringstream proc;
+    proc << path << L" --wait-for-pid=" << std::to_wstring(GetCurrentProcessId());
+
+    wxExecute(proc.str(), wxEXEC_ASYNC);
+    Close(true);
+}
+
+void MainFrame::UpdateThemeMenu()
+{
+    auto const theme = m_cfg->Get<std::string>("theme_id").value_or("system");
+    auto menuBar = this->GetMenuBar();
+
+    if (menuBar == nullptr) { return; }
+
+    int id = ptID_EVT_THEME_SYSTEM;
+    if (theme == "light") { id = ptID_EVT_THEME_LIGHT; }
+    else if (theme == "dark") { id = ptID_EVT_THEME_DARK; }
+
+    menuBar->Check(id, true);
+}
+
+void MainFrame::OnViewTheme(wxCommandEvent& evt)
+{
+    std::string theme = "system";
+    if (evt.GetId() == ptID_EVT_THEME_LIGHT) { theme = "light"; }
+    else if (evt.GetId() == ptID_EVT_THEME_DARK) { theme = "dark"; }
+
+    if (theme == m_cfg->Get<std::string>("theme_id").value_or("system"))
+    {
+        return;
+    }
+
+    bool const wasDark = m_cfg->IsDarkMode();
+    m_cfg->Set("theme_id", theme);
+
+    // Nothing changes visually (e.g. Dark -> System while Windows is dark)
+    if (m_cfg->IsDarkMode() == wasDark)
+    {
+        return;
+    }
+
+    wxMessageDialog dlg(
+        this,
+        i18n("prompt_restart"),
+        i18n("prompt_restart_title"),
+        wxYES_NO | wxYES_DEFAULT | wxICON_INFORMATION);
+
+    dlg.SetYesNoLabels(
+        wxMessageDialog::ButtonLabel(wxString(i18n("restart_picotorrent"))),
+        wxMessageDialog::ButtonLabel(wxID_CANCEL));
+
+    if (dlg.ShowModal() == wxID_YES)
+    {
+        this->RestartApplication();
+    }
+}
+
 void MainFrame::OnViewPreferences(wxCommandEvent&)
 {
     Dialogs::PreferencesDialog dlg(this, m_cfg);
@@ -780,17 +851,11 @@ void MainFrame::OnViewPreferences(wxCommandEvent&)
     {
         if (dlg.WantsRestart())
         {
-            TCHAR path[MAX_PATH];
-            GetModuleFileName(NULL, path, ARRAYSIZE(path));
-
-            std::wstringstream proc;
-            proc << path << L" --wait-for-pid=" << std::to_wstring(GetCurrentProcessId());
-
-            wxExecute(proc.str(), wxEXEC_ASYNC);
-            Close(true);
-
+            this->RestartApplication();
             return;
         }
+
+        this->UpdateThemeMenu();
 
         // Reload settings
         m_session->ReloadSettings();

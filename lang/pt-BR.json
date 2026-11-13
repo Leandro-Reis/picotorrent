@@ -307,5 +307,9 @@
     "copyright_text": "© 2015-2021",
     "export": "Exportar",
     "torrent_file_s": "Arquivo(s) torrent(s)",
-    "exported_magnet_link_s": "Link(s) magnéticos exportados"
+    "exported_magnet_link_s": "Link(s) magnéticos exportados",
+    "theme": "Tema",
+    "light_theme": "Claro",
+    "dark_theme": "Escuro",
+    "follow_system_theme": "Sistema"
 }
