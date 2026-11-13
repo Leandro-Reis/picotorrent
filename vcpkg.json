@@ -14,6 +14,10 @@
     {
       "name": "fmt",
       "version": "9.1.0"
+    },
+    {
+      "name": "libtorrent",
+      "version": "2.0.11"
     }
   ]
 }
