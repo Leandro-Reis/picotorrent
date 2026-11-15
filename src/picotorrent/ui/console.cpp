@@ -27,7 +27,7 @@ Console::Console(wxWindow* parent, wxWindowID id, pt::UI::Models::TorrentListMod
     sizer->Add(new wxStaticBitmap(this, wxID_ANY, funnel), 0, wxALIGN_CENTER | wxLEFT, FromDIP(4));
     sizer->Add(m_input, 1, wxEXPAND | wxALL, FromDIP(4));
 
-    this->SetBackgroundColour(isDarkMode ? wxColour(32,32,32) : wxColour(255,255,255));
+    this->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
     this->SetSizerAndFit(sizer);
 
     this->Bind(

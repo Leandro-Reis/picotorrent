@@ -15,6 +15,7 @@
 #include "core/database.hpp"
 #include "core/environment.hpp"
 #include "core/utils.hpp"
+#include "ui/theme.hpp"
 #include "ui/mainframe.hpp"
 #include "ui/translator.hpp"
 
@@ -110,10 +111,16 @@ bool Application::OnInit()
             .value_or(env->GetCurrentLocale()));
     
     // Load theme
-    if (cfg->IsDarkMode())
+    auto const theme = cfg->GetResolvedTheme();
+    if (theme != "light")
     {
-        wxApp::MSWEnableDarkMode(wxApp::DarkMode_Always);
+        wxApp::MSWEnableDarkMode(
+            wxApp::DarkMode_Always,
+            new pt::UI::ThemeSettings(theme == "gray"));
     }
+
+    pt::UI::ProgressColors::Set(
+        cfg->Get<std::string>("ui.progress_color").value_or("green"));
 
     // Load plugins
     for (auto& p : fs::directory_iterator(env->GetApplicationPath()))

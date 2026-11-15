@@ -32,6 +32,7 @@
 #include "dialogs/addtorrentdialog.hpp"
 #include "dialogs/createtorrentdialog.hpp"
 #include "dialogs/preferencesdialog.hpp"
+#include "theme.hpp"
 #include "ids.hpp"
 #include "models/torrentlistmodel.hpp"
 #include "statusbar.hpp"
@@ -45,6 +46,7 @@
 
 namespace fs = std::filesystem;
 using pt::UI::MainFrame;
+using pt::UI::ProgressColors;
 
 const char* WindowTitle = "PicoTorrent";
 
@@ -70,7 +72,9 @@ MainFrame::MainFrame(std::shared_ptr<pt::Core::Environment> env, std::shared_ptr
     m_console = new Console(this, wxID_ANY, m_torrentListModel, m_cfg->IsDarkMode());
 
     m_splitter->SetWindowStyleFlag(
-        m_splitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE);
+        m_cfg->IsDarkMode()
+            ? (wxSP_LIVE_UPDATE | wxSP_NOBORDER | wxSP_THIN_SASH)
+            : (m_splitter->GetWindowStyleFlag() | wxSP_LIVE_UPDATE));
     m_splitter->SetMinimumPaneSize(10);
     m_splitter->SetSashGravity(0.5);
     m_splitter->SplitHorizontally(
@@ -253,6 +257,7 @@ MainFrame::MainFrame(std::shared_ptr<pt::Core::Environment> env, std::shared_ptr
     this->Bind(wxEVT_MENU, [this](wxCommandEvent&) { this->Close(true); }, ptID_EVT_EXIT);
     this->Bind(wxEVT_MENU, &MainFrame::OnViewPreferences, this, ptID_EVT_VIEW_PREFERENCES);
     this->Bind(wxEVT_MENU, &MainFrame::OnViewTheme, this, ptID_EVT_THEME_LIGHT, ptID_EVT_THEME_SYSTEM);
+    this->Bind(wxEVT_MENU, &MainFrame::OnViewProgressColor, this, ptID_EVT_PROGRESS_COLOR_FIRST, ptID_EVT_PROGRESS_COLOR_LAST);
     this->Bind(wxEVT_MENU, &MainFrame::OnViewHelp, this, ptID_EVT_VIEW_HELP);
     this->Bind(wxEVT_MENU, &MainFrame::OnHelpAbout, this, ptID_EVT_ABOUT);
 
@@ -659,9 +664,25 @@ wxMenuBar* MainFrame::CreateMainMenu()
 
     auto themeMenu = new wxMenu();
     themeMenu->AppendRadioItem(ptID_EVT_THEME_LIGHT, i18n("light_theme"));
+    themeMenu->AppendRadioItem(ptID_EVT_THEME_GRAY, i18n("gray_theme"));
     themeMenu->AppendRadioItem(ptID_EVT_THEME_DARK, i18n("dark_theme"));
     themeMenu->AppendRadioItem(ptID_EVT_THEME_SYSTEM, i18n("follow_system_theme"));
     m_viewMenu->AppendSubMenu(themeMenu, i18n("theme"));
+
+    auto progressColorMenu = new wxMenu();
+    auto const& colorOptions = ProgressColors::Options();
+    for (size_t i = 0; i < colorOptions.size(); i++)
+    {
+        auto item = progressColorMenu->AppendRadioItem(
+            ptID_EVT_PROGRESS_COLOR_FIRST + static_cast<int>(i),
+            i18n(colorOptions[i].second));
+
+        if (colorOptions[i].first == ProgressColors::CurrentId())
+        {
+            item->Check(true);
+        }
+    }
+    m_viewMenu->AppendSubMenu(progressColorMenu, i18n("progress_bar_color"));
     m_viewMenu->AppendSeparator();
     m_viewMenu->Append(ptID_EVT_VIEW_PREFERENCES, i18n("amp_preferences"));
 
@@ -802,15 +823,34 @@ void MainFrame::UpdateThemeMenu()
 
     int id = ptID_EVT_THEME_SYSTEM;
     if (theme == "light") { id = ptID_EVT_THEME_LIGHT; }
+    else if (theme == "gray") { id = ptID_EVT_THEME_GRAY; }
     else if (theme == "dark") { id = ptID_EVT_THEME_DARK; }
 
     menuBar->Check(id, true);
+}
+
+void MainFrame::OnViewProgressColor(wxCommandEvent& evt)
+{
+    auto const& options = ProgressColors::Options();
+    size_t const idx = static_cast<size_t>(evt.GetId() - ptID_EVT_PROGRESS_COLOR_FIRST);
+
+    if (idx >= options.size())
+    {
+        return;
+    }
+
+    ProgressColors::Set(options[idx].first);
+    m_cfg->Set("ui.progress_color", options[idx].first);
+
+    m_torrentList->Refresh();
+    m_torrentDetails->Refresh();
 }
 
 void MainFrame::OnViewTheme(wxCommandEvent& evt)
 {
     std::string theme = "system";
     if (evt.GetId() == ptID_EVT_THEME_LIGHT) { theme = "light"; }
+    else if (evt.GetId() == ptID_EVT_THEME_GRAY) { theme = "gray"; }
     else if (evt.GetId() == ptID_EVT_THEME_DARK) { theme = "dark"; }
 
     if (theme == m_cfg->Get<std::string>("theme_id").value_or("system"))
@@ -818,11 +858,11 @@ void MainFrame::OnViewTheme(wxCommandEvent& evt)
         return;
     }
 
-    bool const wasDark = m_cfg->IsDarkMode();
+    auto const previous = m_cfg->GetResolvedTheme();
     m_cfg->Set("theme_id", theme);
 
     // Nothing changes visually (e.g. Dark -> System while Windows is dark)
-    if (m_cfg->IsDarkMode() == wasDark)
+    if (m_cfg->GetResolvedTheme() == previous)
     {
         return;
     }

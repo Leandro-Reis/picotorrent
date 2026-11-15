@@ -30,8 +30,13 @@ namespace UI
 
         // Must stay contiguous (bound as a range)
         ptID_EVT_THEME_LIGHT,
+        ptID_EVT_THEME_GRAY,
         ptID_EVT_THEME_DARK,
         ptID_EVT_THEME_SYSTEM,
+
+        // Must stay contiguous and match ProgressColors::Options() order
+        ptID_EVT_PROGRESS_COLOR_FIRST,
+        ptID_EVT_PROGRESS_COLOR_LAST = ptID_EVT_PROGRESS_COLOR_FIRST + 31,
 
         ptID_KEY_ADD_TORRENT,
         ptID_KEY_ADD_MAGNET_LINK,

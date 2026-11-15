@@ -2,6 +2,8 @@
 
 #include "../../core/configuration.hpp"
 
+#include "../theme.hpp"
+
 #include <wx/dcbuffer.h>
 #include <wx/colour.h>
 
@@ -15,7 +17,8 @@ PieceProgressBar::PieceProgressBar(wxWindow* parent, wxWindowID id, bool isDarkM
     Connect(wxEVT_ERASE_BACKGROUND, wxEraseEventHandler(PieceProgressBar::OnEraseBackground));
     Connect(wxEVT_PAINT, wxPaintEventHandler(PieceProgressBar::OnPaint));
     Connect(wxEVT_SIZE, wxSizeEventHandler(PieceProgressBar::OnSize));
-    m_bgColor = isDarkMode ? wxColour(32,32,32) : wxColour(255,255,255);
+    m_bgColor = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+    m_isDarkMode = isDarkMode;
 }
 
 void PieceProgressBar::UpdateBitfield(lt::typed_bitfield<lt::piece_index_t> const& field)
@@ -41,8 +44,8 @@ void PieceProgressBar::OnPaint(wxPaintEvent&)
 
 void PieceProgressBar::RenderProgress(wxDC& dc)
 {
-    static wxColor bar("#35b1e1");
-    static wxColor darkBorder(50, 50, 50);
+    wxColor const bar = pt::UI::ProgressColors::Get();
+    wxColor const darkBorder = m_isDarkMode ? m_bgColor.ChangeLightness(150) : wxColor(50, 50, 50);
 
     if (m_bitfield.size() > 0)
     {
@@ -76,7 +79,7 @@ void PieceProgressBar::RenderProgress(wxDC& dc)
     else
     {
         dc.SetBrush(m_bgColor);
-        dc.SetPen(wxColor(190, 190, 190));
+        dc.SetPen(m_isDarkMode ? m_bgColor.ChangeLightness(150) : wxColor(190, 190, 190));
         dc.DrawRectangle(this->GetClientRect());
     }
 }

@@ -104,6 +104,7 @@ namespace Core
         std::vector<DhtBootstrapNode> GetDhtBootstrapNodes();
 
         // Dark mode
+        std::string GetResolvedTheme();
         bool IsDarkMode();
         bool IsSystemDarkMode();
         

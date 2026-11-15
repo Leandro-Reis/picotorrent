@@ -311,5 +311,14 @@
     "theme": "Tema",
     "light_theme": "Claro",
     "dark_theme": "Escuro",
-    "follow_system_theme": "Sistema"
+    "follow_system_theme": "Sistema",
+    "gray_theme": "Cinza",
+    "progress_bar_color": "Cor da barra de progresso",
+    "progress_color_green": "Verde",
+    "progress_color_blue": "Azul",
+    "progress_color_red": "Vermelho",
+    "progress_color_orange": "Laranja",
+    "progress_color_yellow": "Amarelo",
+    "progress_color_purple": "Roxo",
+    "progress_color_pink": "Rosa"
 }

@@ -231,5 +231,14 @@
     "theme": "Theme",
     "light_theme": "Light",
     "follow_system_theme": "System",
-    "dark_theme": "Dark"
+    "dark_theme": "Dark",
+    "gray_theme": "Gray",
+    "progress_bar_color": "Progress bar color",
+    "progress_color_green": "Green",
+    "progress_color_blue": "Blue",
+    "progress_color_red": "Red",
+    "progress_color_orange": "Orange",
+    "progress_color_yellow": "Yellow",
+    "progress_color_purple": "Purple",
+    "progress_color_pink": "Pink"
 }

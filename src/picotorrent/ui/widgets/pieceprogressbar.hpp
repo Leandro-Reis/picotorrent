@@ -27,6 +27,7 @@ namespace pt::UI::Widgets
     private:
         void RenderProgress(wxDC& dc);
         wxColour m_bgColor;
+        bool m_isDarkMode;
         libtorrent::typed_bitfield<libtorrent::piece_index_t> m_bitfield;
     };
 }

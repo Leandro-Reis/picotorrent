@@ -235,12 +235,16 @@ bool Configuration::IsSystemDarkMode()
     return systemUsesDarkTheme;
 }
 
-bool Configuration::IsDarkMode()
+std::string Configuration::GetResolvedTheme()
 {
     auto const theme = Configuration::Get<std::string>("theme_id").value_or("system");
 
-    if (theme == "light") { return false; }
-    if (theme == "dark") { return true; }
+    if (theme == "light" || theme == "gray" || theme == "dark") { return theme; }
 
-    return Configuration::IsSystemDarkMode();
+    return Configuration::IsSystemDarkMode() ? "dark" : "light";
+}
+
+bool Configuration::IsDarkMode()
+{
+    return Configuration::GetResolvedTheme() != "light";
 }

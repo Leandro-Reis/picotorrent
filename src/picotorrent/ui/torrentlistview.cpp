@@ -5,13 +5,17 @@
 #include "../bittorrent/torrenthandle.hpp"
 #include "models/torrentlistmodel.hpp"
 #include "persistence/persistenttorrentlistview.hpp"
+#include "coloredprogressrenderer.hpp"
+#include "theme.hpp"
 #include "translator.hpp"
 
 using pt::UI::TorrentListView;
+using pt::UI::ColoredProgressRenderer;
+using pt::UI::IsDarkTheme;
 using pt::UI::Models::TorrentListModel;
 
 TorrentListView::TorrentListView(wxWindow* parent, wxWindowID id, pt::UI::Models::TorrentListModel* model)
-    : wxDataViewCtrl(parent, id, wxDefaultPosition, wxDefaultSize, wxDV_MULTIPLE, wxDefaultValidator, "TorrentListView"),
+    : wxDataViewCtrl(parent, id, wxDefaultPosition, wxDefaultSize, wxDV_MULTIPLE | (IsDarkTheme() ? wxBORDER_NONE : 0), wxDefaultValidator, "TorrentListView"),
     m_model(model)
 {
     this->AssociateModel(m_model);
@@ -74,7 +78,7 @@ TorrentListView::TorrentListView(wxWindow* parent, wxWindowID id, pt::UI::Models
         ColumnMetadata(
             new wxDataViewColumn(
                 i18n("progress"),
-                new wxDataViewProgressRenderer(),
+                new ColoredProgressRenderer(),
                 TorrentListModel::Columns::Progress,
                 FromDIP(100),
                 wxALIGN_NOT,

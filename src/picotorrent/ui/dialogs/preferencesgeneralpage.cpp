@@ -149,13 +149,15 @@ PreferencesGeneralPage::PreferencesGeneralPage(wxWindow* parent, std::shared_ptr
     }
     
     m_theme->Append(i18n("light_theme"), new ClientData<std::string>("light"));
+    m_theme->Append(i18n("gray_theme"), new ClientData<std::string>("gray"));
     m_theme->Append(i18n("dark_theme"), new ClientData<std::string>("dark"));
     m_theme->Append(i18n("follow_system_theme"), new ClientData<std::string>("system"));
 
     auto const currentTheme = m_cfg->Get<std::string>("theme_id").value_or("system");
     if (currentTheme == "light") { m_theme->SetSelection(0); }
-    else if (currentTheme == "dark") { m_theme->SetSelection(1); }
-    else { m_theme->SetSelection(2); }
+    else if (currentTheme == "gray") { m_theme->SetSelection(1); }
+    else if (currentTheme == "dark") { m_theme->SetSelection(2); }
+    else { m_theme->SetSelection(3); }
 
     m_labelColor->SetValue(m_cfg->Get<bool>("use_label_as_list_bgcolor").value());
     m_skipAddTorrentDialog->SetValue(m_cfg->Get<bool>("skip_add_torrent_dialog").value());

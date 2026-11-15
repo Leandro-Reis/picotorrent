@@ -1,13 +1,15 @@
 #include "torrentfilelistview.hpp"
 
 #include "models/filestoragemodel.hpp"
+#include "coloredprogressrenderer.hpp"
+#include "theme.hpp"
 #include "translator.hpp"
 
 using pt::UI::TorrentFileListView;
 using pt::UI::Models::FileStorageModel;
 
 TorrentFileListView::TorrentFileListView(wxWindow* parent, wxWindowID id)
-    : wxDataViewCtrl(parent, id, wxDefaultPosition, wxDefaultSize, wxDV_MULTIPLE, wxDefaultValidator, "TorrentFileListView")
+    : wxDataViewCtrl(parent, id, wxDefaultPosition, wxDefaultSize, wxDV_MULTIPLE | (pt::UI::IsDarkTheme() ? wxBORDER_NONE : 0), wxDefaultValidator, "TorrentFileListView")
 {
     auto nameCol = AppendIconTextColumn(
         i18n("name"),
@@ -23,12 +25,13 @@ TorrentFileListView::TorrentFileListView(wxWindow* parent, wxWindowID id)
         FromDIP(80),
         wxALIGN_RIGHT);
 
-    AppendProgressColumn(
-        i18n("progress"),
-        FileStorageModel::Columns::Progress,
-        wxDATAVIEW_CELL_INERT,
-        FromDIP(80),
-        wxALIGN_LEFT);
+    AppendColumn(
+        new wxDataViewColumn(
+            i18n("progress"),
+            new pt::UI::ColoredProgressRenderer(),
+            FileStorageModel::Columns::Progress,
+            FromDIP(80),
+            wxALIGN_LEFT));
 
     AppendTextColumn(
         i18n("priority"),
