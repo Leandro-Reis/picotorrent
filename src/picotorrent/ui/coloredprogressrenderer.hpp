@@ -47,8 +47,9 @@ namespace pt::UI
 
         bool Render(wxRect rect, wxDC* dc, int) override
         {
-            int const margin = GetView() ? GetView()->FromDIP(2) : 2;
-            rect.Deflate(margin, margin + 1);
+            // Fill the whole cell, leaving a 1px gap so neighbouring
+            // rows and columns don't touch.
+            rect.Deflate(1, 1);
 
             if (rect.width <= 2 || rect.height <= 2)
             {
