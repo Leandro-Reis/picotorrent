@@ -843,7 +843,7 @@ void MainFrame::OnViewProgressColor(wxCommandEvent& evt)
     m_cfg->Set("ui.progress_color", options[idx].first);
 
     m_torrentList->Refresh();
-    m_torrentDetails->Refresh();
+    m_torrentDetails->wxWindow::Refresh();
 }
 
 void MainFrame::OnViewTheme(wxCommandEvent& evt)
