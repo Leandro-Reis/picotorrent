@@ -46,7 +46,6 @@
 
 namespace fs = std::filesystem;
 using pt::UI::MainFrame;
-using pt::UI::ProgressColors;
 
 const char* WindowTitle = "PicoTorrent";
 
@@ -257,7 +256,6 @@ MainFrame::MainFrame(std::shared_ptr<pt::Core::Environment> env, std::shared_ptr
     this->Bind(wxEVT_MENU, [this](wxCommandEvent&) { this->Close(true); }, ptID_EVT_EXIT);
     this->Bind(wxEVT_MENU, &MainFrame::OnViewPreferences, this, ptID_EVT_VIEW_PREFERENCES);
     this->Bind(wxEVT_MENU, &MainFrame::OnViewTheme, this, ptID_EVT_THEME_LIGHT, ptID_EVT_THEME_SYSTEM);
-    this->Bind(wxEVT_MENU, &MainFrame::OnViewProgressColor, this, ptID_EVT_PROGRESS_COLOR_FIRST, ptID_EVT_PROGRESS_COLOR_LAST);
     this->Bind(wxEVT_MENU, &MainFrame::OnViewHelp, this, ptID_EVT_VIEW_HELP);
     this->Bind(wxEVT_MENU, &MainFrame::OnHelpAbout, this, ptID_EVT_ABOUT);
 
@@ -668,21 +666,6 @@ wxMenuBar* MainFrame::CreateMainMenu()
     themeMenu->AppendRadioItem(ptID_EVT_THEME_DARK, i18n("dark_theme"));
     themeMenu->AppendRadioItem(ptID_EVT_THEME_SYSTEM, i18n("follow_system_theme"));
     m_viewMenu->AppendSubMenu(themeMenu, i18n("theme"));
-
-    auto progressColorMenu = new wxMenu();
-    auto const& colorOptions = ProgressColors::Options();
-    for (size_t i = 0; i < colorOptions.size(); i++)
-    {
-        auto item = progressColorMenu->AppendRadioItem(
-            ptID_EVT_PROGRESS_COLOR_FIRST + static_cast<int>(i),
-            i18n(colorOptions[i].second));
-
-        if (colorOptions[i].first == ProgressColors::CurrentId())
-        {
-            item->Check(true);
-        }
-    }
-    m_viewMenu->AppendSubMenu(progressColorMenu, i18n("progress_bar_color"));
     m_viewMenu->AppendSeparator();
     m_viewMenu->Append(ptID_EVT_VIEW_PREFERENCES, i18n("amp_preferences"));
 
@@ -827,23 +810,6 @@ void MainFrame::UpdateThemeMenu()
     else if (theme == "dark") { id = ptID_EVT_THEME_DARK; }
 
     menuBar->Check(id, true);
-}
-
-void MainFrame::OnViewProgressColor(wxCommandEvent& evt)
-{
-    auto const& options = ProgressColors::Options();
-    size_t const idx = static_cast<size_t>(evt.GetId() - ptID_EVT_PROGRESS_COLOR_FIRST);
-
-    if (idx >= options.size())
-    {
-        return;
-    }
-
-    ProgressColors::Set(options[idx].first);
-    m_cfg->Set("ui.progress_color", options[idx].first);
-
-    m_torrentList->Refresh();
-    m_torrentDetails->wxWindow::Refresh();
 }
 
 void MainFrame::OnViewTheme(wxCommandEvent& evt)

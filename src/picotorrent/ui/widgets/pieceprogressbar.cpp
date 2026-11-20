@@ -2,8 +2,6 @@
 
 #include "../../core/configuration.hpp"
 
-#include "../theme.hpp"
-
 #include <wx/dcbuffer.h>
 #include <wx/colour.h>
 
@@ -44,7 +42,7 @@ void PieceProgressBar::OnPaint(wxPaintEvent&)
 
 void PieceProgressBar::RenderProgress(wxDC& dc)
 {
-    wxColor const bar = pt::UI::ProgressColors::Get();
+    static wxColor bar("#35b1e1");
     wxColor const darkBorder = m_isDarkMode ? m_bgColor.ChangeLightness(150) : wxColor(50, 50, 50);
 
     if (m_bitfield.size() > 0)

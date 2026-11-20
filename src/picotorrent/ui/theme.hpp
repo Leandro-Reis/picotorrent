@@ -1,9 +1,5 @@
 #pragma once
 
-#include <string>
-#include <utility>
-#include <vector>
-
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
@@ -135,57 +131,4 @@ namespace pt::UI
     {
         return wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW).GetLuminance() < 0.5;
     }
-
-    // Colour of the progress bars (torrent list, file list, piece bar).
-    class ProgressColors
-    {
-    public:
-        // id, translation key
-        static std::vector<std::pair<std::string, std::string>> const& Options()
-        {
-            static std::vector<std::pair<std::string, std::string>> const options =
-            {
-                { "green",  "progress_color_green" },
-                { "blue",   "progress_color_blue" },
-                { "red",    "progress_color_red" },
-                { "orange", "progress_color_orange" },
-                { "yellow", "progress_color_yellow" },
-                { "purple", "progress_color_purple" },
-                { "pink",   "progress_color_pink" },
-            };
-
-            return options;
-        }
-
-        static std::string& CurrentId()
-        {
-            static std::string id = "green";
-            return id;
-        }
-
-        static void Set(std::string const& id)
-        {
-            for (auto const& [optId, _] : Options())
-            {
-                if (optId == id) { CurrentId() = id; return; }
-            }
-
-            CurrentId() = "green";
-        }
-
-        static wxColour Get()
-        {
-            auto const& id = CurrentId();
-
-            if (id == "blue")   { return wxColour(0x00, 0x78, 0xd4); }
-            if (id == "red")    { return wxColour(0xe8, 0x11, 0x23); }
-            if (id == "orange") { return wxColour(0xf7, 0x63, 0x0c); }
-            if (id == "yellow") { return wxColour(0xff, 0xb9, 0x00); }
-            if (id == "purple") { return wxColour(0x88, 0x64, 0xd8); }
-            if (id == "pink")   { return wxColour(0xe3, 0x00, 0x8c); }
-
-            // Windows progress bar green
-            return wxColour(0x06, 0xb0, 0x25);
-        }
-    };
 }

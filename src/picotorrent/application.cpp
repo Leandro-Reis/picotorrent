@@ -119,9 +119,6 @@ bool Application::OnInit()
             new pt::UI::ThemeSettings(theme == "gray"));
     }
 
-    pt::UI::ProgressColors::Set(
-        cfg->Get<std::string>("ui.progress_color").value_or("green"));
-
     // Load plugins
     for (auto& p : fs::directory_iterator(env->GetApplicationPath()))
     {
