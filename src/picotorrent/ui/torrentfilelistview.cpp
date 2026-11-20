@@ -1,6 +1,7 @@
 #include "torrentfilelistview.hpp"
 
 #include "models/filestoragemodel.hpp"
+#include "lightprogressrenderer.hpp"
 #include "theme.hpp"
 #include "translator.hpp"
 
@@ -24,12 +25,13 @@ TorrentFileListView::TorrentFileListView(wxWindow* parent, wxWindowID id)
         FromDIP(80),
         wxALIGN_RIGHT);
 
-    AppendProgressColumn(
-        i18n("progress"),
-        FileStorageModel::Columns::Progress,
-        wxDATAVIEW_CELL_INERT,
-        FromDIP(80),
-        wxALIGN_LEFT);
+    AppendColumn(
+        new wxDataViewColumn(
+            i18n("progress"),
+            new pt::UI::LightProgressRenderer(wxDATAVIEW_CELL_INERT),
+            FileStorageModel::Columns::Progress,
+            FromDIP(80),
+            wxALIGN_LEFT));
 
     AppendTextColumn(
         i18n("priority"),
